@@ -3,8 +3,9 @@ from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from apollo.core.serializers import (UserSerializer, GroupSerializer,
     RoomSerializer, RoomDataSerializer)
 from apollo.core.models import Room, RoomData
@@ -26,8 +27,7 @@ class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
-#csrf exemption not prod-safe
-@csrf_exempt
+@api_view(['GET', 'POST'])
 def room_list(request):
     """
     List all rooms or add one
@@ -36,11 +36,10 @@ def room_list(request):
     if request.method == 'GET':
         rooms = Room.objects.all()
         serializer = RoomSerializer(rooms, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        return Response(serializer.data)
     elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = RoomSerializer(data=data)
+        serializer = RoomSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
