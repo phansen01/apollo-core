@@ -15,7 +15,7 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 class RoomSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Room
-        fields = ('display_name', 'location_string', 'lat_long', 'capacity', 'tags')
+        fields = ('id', 'display_name', 'location_string', 'lat_long', 'capacity', 'tags')
 
 class RoomDataSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
