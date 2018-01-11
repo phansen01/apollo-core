@@ -61,4 +61,18 @@ class MatchingRooms(APIView):
         print(matches)
         serializer = RoomSerializer(matches, many=True)
         return Response(serializer.data)
-                
+
+class RoomDetail(APIView):
+    """
+    todo
+    """
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+
+    def get(self, request, id):
+        try:
+            room = Room.objects.get(id=id)
+            return Response(RoomSerializer(room).data)
+        except Room.DoesNotExist:
+            print("No room with id {} exists".format(id))
+            #todo return error
+        
