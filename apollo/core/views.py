@@ -53,9 +53,10 @@ class MatchingRooms(APIView):
 
         for room in rooms:
             room_tags = json_dec.decode(room.tags)
-            print(room_tags)
+            print("actual: {}".format(room_tags))
+            print("desired: {}".format(tags))
             if (room.capacity >= capacity
-                    and (set(room_tags) & set(tags))):
+                    and (set(room_tags) >= set(tags))):
                 matches.append(room)
 
         print(matches)
