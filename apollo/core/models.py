@@ -25,7 +25,7 @@ class Reservation(models.Model):
     #reserved_by = # todo: user as foreign key
     begin_time = models.DateTimeField()
     end_time = models.DateTimeField()
-    
+
     def save(self, *args, **kwargs):
         #could just do this validation on the frontend as well
         if self.end_time < self.begin_time:
