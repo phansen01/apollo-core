@@ -1,5 +1,7 @@
 # apollo-core
 
+[![Build Status](https://travis-ci.com/phansen01/apollo-core.svg?token=NMf6bwTExjejsyWqoTBy&branch=master)](https://travis-ci.com/phansen01/apollo-core)
+
 The backend of our shared space reservation platform.
 
 ## Setup
