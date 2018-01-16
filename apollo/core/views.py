@@ -44,10 +44,15 @@ class MatchingRooms(APIView):
     def get(self, request):
         capacity = int(request.query_params.get('capacity', 0))
         tags = request.query_params.getlist('tags', [])
+        #todo: decide on a design for default/missing timestamp
+        timestamp = request.query_params.get('timestamp', 0)
+        print("desired timestamp: {}".format(timestamp))
 
         json_dec = json.decoder.JSONDecoder()
 
-        #todo: implement partial matches or exact matches (for tags)?
+        #todo: right now tag matches are done based on subsets
+        #(i.e. room has at least all requested features). Should
+        #make this more robust by implementing partial matches
         rooms = [room for room in Room.objects.all()]
         matches = []
 
