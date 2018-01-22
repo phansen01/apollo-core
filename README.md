@@ -17,7 +17,14 @@ Install with
 pip install virtualenv
 ```
 I'm currently using `virtualenv` to make development consistent and manage dependencies.
-While not strictly required to develop, it's probably a Good Idea. In the root directory
+While not strictly required to develop, it's probably a Good Idea. 
+
+First, you'll need a python3 installation. On macOS this can be done via
+```sh
+brew install python3
+```
+(or various other ways).
+Next, in the root directory
 of the git repo, do
 ```sh
 virtualenv --python=python3 env
