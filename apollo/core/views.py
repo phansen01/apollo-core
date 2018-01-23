@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User, Group
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import HttpResponse, JsonResponse
@@ -33,20 +33,26 @@ class RoomList(generics.ListCreateAPIView):
     serializer_class = RoomSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
 
-#todo view for RoomData
+class RoomData(generics.ListCreateAPIView):
+    """
+    View to list or update room data points for a given room
+    """
+    queryset = RoomData.objects.all()
+    serializer_class = RoomDataSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 class MatchingRooms(APIView):
     """
     View to return all rooms matching the search criteria
     """
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def get(self, request):
         capacity = int(request.query_params.get('capacity', 0))
         tags = request.query_params.getlist('tags', [])
-        #todo: decide on a design for default/missing timestamp
-        timestamp = request.query_params.get('timestamp', 0)
-        print("desired timestamp: {}".format(timestamp))
+        #todo: decide on a design for default/missing start/end time
+        start = request.query_params.get('startTime', 0)
+        end = request.query_params.get('endTime', 0)
 
         json_dec = json.decoder.JSONDecoder()
 
@@ -81,4 +87,3 @@ class RoomDetail(APIView):
         except Room.DoesNotExist:
             print("No room with id {} exists".format(id))
             #todo return error
-        

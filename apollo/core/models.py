@@ -1,9 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 # Create your models here.
-#todo: how to model room availability?
-#we could keep things simple by just using a boolean
-#but it would require frequent access to keep things updated
+
 class Room(models.Model):
     display_name = models.CharField(max_length=50)
     location_string = models.CharField(max_length=50)

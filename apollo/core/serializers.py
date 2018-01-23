@@ -18,6 +18,8 @@ class RoomSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'display_name', 'location_string', 'lat_long', 'capacity', 'tags')
 
 class RoomDataSerializer(serializers.HyperlinkedModelSerializer):
+    room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
+
     class Meta:
         model = RoomData
         fields = ('room', 'timestamp', 'temp', 'noise', 'occupied', 'headcount')
