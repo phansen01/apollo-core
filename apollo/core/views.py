@@ -6,8 +6,8 @@ from rest_framework.response import Response
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from apollo.core.serializers import (UserSerializer, GroupSerializer,
-    RoomSerializer, RoomDataSerializer)
-from apollo.core.models import Room, RoomData
+    RoomSerializer, RoomDataSerializer, ReservationSerializer)
+from apollo.core.models import Room, RoomData, Reservation
 from apollo.core.permissions import permissions
 from apollo.core.permissions import IsOwnerOrReadOnly
 import json
@@ -19,7 +19,6 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
-
 
 class GroupViewSet(viewsets.ModelViewSet):
     """
@@ -74,16 +73,34 @@ class MatchingRooms(APIView):
         serializer = RoomSerializer(matches, many=True)
         return Response(serializer.data)
 
-class RoomDetail(APIView):
+class RoomDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    todo
+    View for fetching, updating, or deleting an existing room
     """
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    def get(self, request, id):
-        try:
-            room = Room.objects.get(id=id)
-            return Response(RoomSerializer(room).data)
-        except Room.DoesNotExist:
-            print("No room with id {} exists".format(id))
-            #todo return error
+
+class ReservationList(generics.ListCreateAPIView):
+    """
+    View for fetching all reservations or adding a reservation
+    """
+    #todo: will need to add object ownership to reservation instances so that
+    #IsOwnerOrReadOnly is actually effective.
+
+    #todo: also will need to think about whether it's ok for users to lose
+    #the ability to modify their reservation if they reserve anonymously, or
+    #find a workaround for this.
+
+    queryset = Reservation.objects.all()
+    serializer_class = ReservationSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+class ReservationDetail(generics.RetrieveDestroyAPIView):
+    """
+    View for fetching a reservation or deleting it
+    """
+    queryset = Reservation.objects.all()
+    serializer_class = ReservationSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
