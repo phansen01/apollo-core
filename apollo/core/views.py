@@ -1,4 +1,7 @@
+from datetime import datetime
+from django.utils import dateparse
 from django.shortcuts import render
+from django.db.models import Q
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets, generics, status
 from rest_framework.views import APIView
@@ -50,11 +53,26 @@ class MatchingRooms(APIView):
         capacity = int(request.query_params.get('capacity', 0))
         tags = request.query_params.getlist('tags', [])
         #todo: decide on a design for default/missing start/end time
-        start = request.query_params.get('startTime', 0)
-        end = request.query_params.get('endTime', 0)
+        begin = request.query_params.get('startTime', '')
+        end = request.query_params.get('endTime', '')
 
         json_dec = json.decoder.JSONDecoder()
 
+        begin_time = dateparse.parse_datetime(begin)
+        end_time = dateparse.parse_datetime(end)
+
+        #todo: sort of duplicate logic here and in the Reservation
+        #serializer, should try to refactor
+        overlaps = Reservation.objects.filter(
+            Q(begin_time__lte=begin_time, end_time__gt=begin_time) |
+            Q(begin_time__lt=end_time, end_time__gte=end_time) |
+            Q(begin_time__gte=begin_time, end_time__lte=end_time)
+        )
+        print(overlaps)
+        rooms_to_exclude = set([overlap.room.id for overlap in overlaps])
+
+        if rooms_to_exclude:
+            print("Rooms to exclude: {}".format(rooms_to_exclude))
         #todo: right now tag matches are done based on subsets
         #(i.e. room has at least all requested features). Should
         #make this more robust by implementing partial matches
@@ -62,6 +80,9 @@ class MatchingRooms(APIView):
         matches = []
 
         for room in rooms:
+            if room.id in rooms_to_exclude:
+                print("Room {} has an overlapping reservation, skipping.".format(room.id))
+                continue
             room_tags = json_dec.decode(room.tags)
             print("actual: {}".format(room_tags))
             print("desired: {}".format(tags))

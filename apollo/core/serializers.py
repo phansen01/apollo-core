@@ -30,11 +30,14 @@ class ReservationSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """
-        Check that a reservation is valid (doesn't overlap existing reservations)
+        Check that a reservation is valid (doesn't overlap existing reservations,
+        and begin is before end)
         """
+        #This logic is duplicated in the model's `save` method but I'd rather
+        #be safe than sorry.
         if data['begin_time'] > data['end_time']:
             raise serializers.ValidationError("End time must be after begin time")
-        
+
         #There are 3 cases to check to find an overlap:
         #1) the meeting begins before this meeting, and ends after this one begins
         #2) the meeting starts before this one ends, and ends before this one ends
@@ -49,7 +52,7 @@ class ReservationSerializer(serializers.ModelSerializer):
 
         if overlaps.exists():
             raise serializers.ValidationError("This reservation overlaps existing reservation(s)")
-        
+
         return data
 
     class Meta:
