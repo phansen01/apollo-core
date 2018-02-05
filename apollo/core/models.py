@@ -3,6 +3,9 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 class Room(models.Model):
+    #if an admin user is deleted for some reason, just null the
+    #admin (owner) field of this room.
+    admin = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     display_name = models.CharField(max_length=50)
     location_string = models.CharField(max_length=50)
     lat_long = models.CharField(max_length=50)
