@@ -35,13 +35,32 @@ class RoomList(generics.ListCreateAPIView):
     serializer_class = RoomSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
 
-class RoomData(generics.ListCreateAPIView):
+class RoomDataView(generics.ListCreateAPIView):
     """
     View to list or update room data points for a given room
     """
     queryset = RoomData.objects.all()
     serializer_class = RoomDataSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get(self, request):
+        room = int(request.query_params.get('room', 0))
+        begin = request.query_params.get('startTime', '')
+        end = request.query_params.get('endTime', '')
+
+        matches = RoomData.objects.all()
+        if room != 0:
+            matches = RoomData.objects.filter(room=room)
+        if begin != '' and end != '':
+            begin_time = dateparse.parse_datetime(begin)
+            end_time = dateparse.parse_datetime(end)
+            matches = matches.filter(
+                Q(timestamp__ge=begin_time) &
+                Q(timestamp__le=end_time)
+            )
+        
+        serializer = RoomDataSerializer(list(matches), many=True)
+        return Response(serializer.data)
 
 class MatchingRooms(APIView):
     """
@@ -76,7 +95,7 @@ class MatchingRooms(APIView):
         #todo: right now tag matches are done based on subsets
         #(i.e. room has at least all requested features). Should
         #make this more robust by implementing partial matches
-        rooms = [room for room in Room.objects.all()]
+        rooms = list(Room.objects.all())
         matches = []
 
         for room in rooms:
