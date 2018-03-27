@@ -1,0 +1,19 @@
+# [START runtime]
+runtime: python
+env: flex
+entrypoint: gunicorn -b :$PORT apollo.wsgi
+
+beta_settings:
+    cloud_sql_instances: ece397-198318:us-central1:apollo-db-dev
+
+runtime_config:
+  python_version: 3
+
+env_variables:
+  DJANGO_SECRET_KEY: '!dg1bv&u2hxh%f#ohd_^l^dyw+m0iu)^0o50bldpan@ks&4s5n'
+  DJANGO_DEBUG: 'True'
+  DB_USER: 'apollo-user'
+  DB_PSWD: 'f1r3dutt'
+  CLOUDSQL_CONNECTION_STRING: "ece397-198318:us-central1:apollo-db-dev"
+  GCS_STATIC_FILES_BUCKET: "ece397-apollo-static"
+# [END runtime]

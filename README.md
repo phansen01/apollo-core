@@ -45,6 +45,12 @@ If a new dependency is needed, it can be installed with pip and then `pip freeze
 the dependencies (`requirements.txt`).
 
 ## Running
+Before starting a local instance, environment variables must be set, and the SQL proxy must be started. (See Deployment section for additional details.)
+
+```sh
+source env_vars.sh
+./start_sql_proxy
+```
 
 Like any django app, the server can be run with
 ```sh
@@ -55,3 +61,33 @@ and a shell can be started to mess around with via
 python manage.py shell
 ```
 See the django docs for all the available options.
+
+## Deployment
+
+Production deployment of this application is configured for use with Google Cloud Platform.
+The Apollo Application is served by a [App Engine Python 3 Flexible Runtime](https://cloud.google.com/appengine/docs/flexible/python/), static content is served from [Cloud Storage](https://cloud.google.com/storage/docs/), and structured data is managed by a PostgresSQL database on [Cloud SQL](https://cloud.google.com/sql/docs/postgres/).
+
+For latency optimization for a Expo Demo in Chicago, the application is hosted in the [us-central1 region](https://cloud.google.com/about/locations/), which is one state West in Iowa.
+
+### Google Cloud Platform Dependencies
+Working with GCP services requires the installation of the namesake SDK, and a proxy script for
+connecting to a hosted database.
+
+- [Google Cloud SDK](https://cloud.google.com/sdk/docs/)
+- [Cloud SQL Proxy](https://cloud.google.com/sql/docs/postgres/sql-proxy)
+
+### Integration with Frontend Component.
+Django is also used to serve frontend content found in the apollo-ui project via the [django-webpack-loader](https://github.com/ezhome/django-webpack-loader) module.
+Build the frontend via webpack, put the webpack-stats.json in the project root directory, and the bundles in /assets/bundles. If this is unclear, look at .gitignore for details.
+
+### Deploying to Production
+Before deploying a new version of the application, static assets must be collected and uploaded.
+As with other django management commands, this will fail if environment variables have not been set.
+```sh
+python manage.py collectstatic
+./sync_static.sh
+```
+Once static files are uploaded, the app itself can be deployed.
+```sh
+gcloud app deploy
+```

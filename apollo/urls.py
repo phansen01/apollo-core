@@ -16,8 +16,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.conf.urls import url, include
+from django.views.generic import TemplateView
 
 urlpatterns = [
     url(r'^', include('apollo.core.urls')),
     path('admin/', admin.site.urls),
+    # match the root
+    url(r'^$', TemplateView.as_view(template_name="index.html")),
+    # match all other pages
+    url(r'^(?:.*)/?$', TemplateView.as_view(template_name="index.html")),
 ]

@@ -1,0 +1,2 @@
+app.yaml filter=git-crypt diff=git-crypt
+env_vars.sh filter=git-crypt diff=git-crypt

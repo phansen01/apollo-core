@@ -1,3 +1,11 @@
 env/
 *.pyc
 .vscode
+
+# Tools
+cloud_sql_proxy
+
+# Build
+/static
+/assets/bundles/*
+webpack-stats.json
