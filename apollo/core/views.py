@@ -13,7 +13,6 @@ from apollo.core.serializers import (UserSerializer, GroupSerializer,
 from apollo.core.models import Room, RoomData, Reservation
 from apollo.core.permissions import permissions
 from apollo.core.permissions import IsOwnerOrReadOnly
-import json
 # Create your views here.
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -75,8 +74,6 @@ class MatchingRooms(APIView):
         begin = request.query_params.get('startTime', '')
         end = request.query_params.get('endTime', '')
 
-        json_dec = json.decoder.JSONDecoder()
-
         begin_time = dateparse.parse_datetime(begin)
         end_time = dateparse.parse_datetime(end)
 
@@ -102,7 +99,7 @@ class MatchingRooms(APIView):
             if room.id in rooms_to_exclude:
                 print("Room {} has an overlapping reservation, skipping.".format(room.id))
                 continue
-            room_tags = json_dec.decode(room.tags)
+            room_tags = room.tags
             print("actual: {}".format(room_tags))
             print("desired: {}".format(tags))
             if (room.capacity >= capacity
