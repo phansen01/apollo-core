@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 # Create your models here.
 
 class Room(models.Model):
@@ -10,8 +11,10 @@ class Room(models.Model):
     location_string = models.CharField(max_length=50)
     lat_long = models.CharField(max_length=50)
     capacity = models.SmallIntegerField(default=1)
-    #stored as a string that will be encoded/decoded as a json list for now
-    tags = models.TextField(null=True, default="[]")
+    tags = ArrayField(
+        models.CharField(max_length=20, blank=False),
+        null=True
+    )
 
 class RoomData(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
