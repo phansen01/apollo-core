@@ -19,10 +19,13 @@ from django.conf.urls import url, include
 from django.views.generic import TemplateView
 
 urlpatterns = [
-    url(r'^', include('apollo.core.urls')),
-    path('admin/', admin.site.urls),
+    url(r'^api/', include('apollo.core.urls')),
+    #path('admin/', admin.site.urls),
     # match the root
     url(r'^$', TemplateView.as_view(template_name="index.html")),
-    # match all other pages
-    url(r'^(?:.*)/?$', TemplateView.as_view(template_name="index.html")),
+    # match all other client-side routes
+    url(r'^rooms/\d+$', TemplateView.as_view(template_name="index.html")),
+    url(r'^reservations/\d+$', TemplateView.as_view(template_name="index.html")),
+    url(r'^admin/$', TemplateView.as_view(template_name="index.html")),
+    
 ]
