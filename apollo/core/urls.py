@@ -10,5 +10,6 @@ urlpatterns = [
     url(r'^roomdata/$', views.RoomDataView.as_view()),
     url(r'^reservations/$', views.ReservationList.as_view()),
     re_path(r'^reservations/(?P<pk>[0-9]+)/$', views.ReservationDetail.as_view()),
+    url(r'^ghosted-meetings/$', views.GhostedMeetings.as_view()),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

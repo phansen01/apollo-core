@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils import dateparse
 from django.shortcuts import render
 from django.db.models import Q
@@ -34,6 +34,43 @@ class RoomList(generics.ListCreateAPIView):
     serializer_class = RoomSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
 
+
+class GhostedMeetings(APIView):
+    def get(self, request):
+        room = int(request.query_params.get('room', 0))
+        #begin = request.query_params.get('startTime', '')
+        #end = request.query_params.get('endTime', '')
+        
+        result = {}
+        rooms = Room.objects.all()
+        if room != 0:
+            rooms = Room.objects.filter(pk=room)
+        for room in rooms:
+            result[room.id] = 0
+            today = datetime.today()
+            a_week_ago = today - timedelta(days=7)
+            reservations = Reservation.objects.filter(room=room).filter(
+                Q(begin_time__gte=a_week_ago) &
+                Q(begin_time__lte=today)
+            )
+            for reservation in reservations:
+                #get all roomdata that we have which overlaps the reservation
+                data = RoomData.objects.filter(room=room).filter(
+                    Q(timestamp__gte=reservation.begin_time) &
+                    Q(timestamp__lte=reservation.end_time)
+                )
+                #if the room was ever occupied, dont count this meeting
+                #as ghosted. Otherwise, increment the number of ghosted
+                #meetings for this room.
+                ghosted = True
+                for d in data:
+                    if d.occupied:
+                        ghosted = False
+                        break
+                if ghosted:
+                    result[room.id] += 1
+            return JsonResponse(result)
+
 class RoomDataView(generics.ListCreateAPIView):
     """
     View to list or update room data points for a given room
@@ -54,8 +91,8 @@ class RoomDataView(generics.ListCreateAPIView):
             begin_time = dateparse.parse_datetime(begin)
             end_time = dateparse.parse_datetime(end)
             matches = matches.filter(
-                Q(timestamp__ge=begin_time) &
-                Q(timestamp__le=end_time)
+                Q(timestamp__gte=begin_time) &
+                Q(timestamp__lte=end_time)
             )
         
         serializer = RoomDataSerializer(list(matches), many=True)
