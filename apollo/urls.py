@@ -20,6 +20,7 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
     url(r'^api/', include('apollo.core.urls')),
+    url(r'^management/', include('apollo.core.management.urls')),
     #path('admin/', admin.site.urls),
     # match the root
     url(r'^$', TemplateView.as_view(template_name="index.html")),
