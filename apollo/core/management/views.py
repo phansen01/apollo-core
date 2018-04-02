@@ -21,6 +21,7 @@ class UpdateDynamicTags(APIView):
                 if 'quiet' in room.tags:
                     room.tags.remove('quiet')
             else:
-                room.tags.append('quiet')
+                if 'quiet' not in room.tags:
+                    room.tags.append('quiet')
             room.save()
             return Response(status=200)
