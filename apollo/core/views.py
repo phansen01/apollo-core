@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from django.utils import dateparse
 from django.shortcuts import render
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets, generics, status
 from rest_framework.views import APIView
@@ -70,6 +70,27 @@ class GhostedMeetings(APIView):
                 if ghosted:
                     result[room.id] += 1
             return JsonResponse(result)
+
+class ReservationsPerWeek(APIView):
+    def get(self, request):
+        room = int(request.query_params.get('room', 0))
+        #begin = request.query_params.get('startTime', '')
+        #end = request.query_params.get('endTime', '')
+        
+        result = {}
+        rooms = Room.objects.all()
+        if room != 0:
+            rooms = Room.objects.filter(pk=room)
+        for room in rooms:
+            today = datetime.today()
+            a_week_ago = today - timedelta(days=7)
+            num_reservations = Reservation.objects.filter(room=room).filter(
+                Q(begin_time__gte=a_week_ago) &
+                Q(begin_time__lte=today)
+            ).count()
+            result[room.id] = num_reservations
+
+        return JsonResponse(result)
 
 class RoomDataView(generics.ListCreateAPIView):
     """
