@@ -1,4 +1,4 @@
 cron:
 - description: "update dynamic room tags"
   url: /management/update-dynamic-tags/
-  schedule: every 7 days
+  schedule: every 168 hours
