@@ -69,7 +69,7 @@ class GhostedMeetings(APIView):
                         break
                 if ghosted:
                     result[room.id] += 1
-            return JsonResponse(result)
+        return JsonResponse(result)
 
 class ReservationsPerWeek(APIView):
     def get(self, request):
@@ -82,14 +82,47 @@ class ReservationsPerWeek(APIView):
         if room != 0:
             rooms = Room.objects.filter(pk=room)
         for room in rooms:
+            result[room.id] = {}
+            result[room.id]["display_name"] = room.display_name
             today = datetime.today()
             a_week_ago = today - timedelta(days=7)
-            num_reservations = Reservation.objects.filter(room=room).filter(
+            weekly_reservations = Reservation.objects.filter(room=room).filter(
                 Q(begin_time__gte=a_week_ago) &
                 Q(begin_time__lte=today)
-            ).count()
-            result[room.id] = num_reservations
+            )
+            num_reservations = weekly_reservations.count()
+            total_usage_mins = 0
+            for res in weekly_reservations:
+                length = res.end_time - res.begin_time
+                total_usage_mins += length.seconds / 60
+            result[room.id]["total_usage_mins"] = int(total_usage_mins)
+            result[room.id]["num_reservations"] = num_reservations
 
+        return JsonResponse(result)
+
+class BusiestTimes(APIView):
+    def get(self, request):
+        room = int(request.query_params.get('room', 0))
+        #begin = request.query_params.get('startTime', '')
+        #end = request.query_params.get('endTime', '')
+        
+        result = {}
+        rooms = Room.objects.all()
+        if room != 0:
+            rooms = Room.objects.filter(pk=room)
+        for room in rooms:
+            result[room.id] = {}
+            result[room.id]["display_name"] = room.display_name
+            result[room.id]["hourly_reservations"] = {hour: 0 for hour in range(24)}
+            today = datetime.today()
+            a_week_ago = today - timedelta(days=7)
+            weekly_reservations = Reservation.objects.filter(room=room).filter(
+                Q(begin_time__gte=a_week_ago) &
+                Q(begin_time__lte=today)
+            )
+            for reservation in weekly_reservations:
+                hour = reservation.begin_time.hour
+                result[room.id]["hourly_reservations"][hour] += 1
         return JsonResponse(result)
 
 class RoomDataView(generics.ListCreateAPIView):
